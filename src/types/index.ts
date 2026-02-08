@@ -7,6 +7,8 @@ export interface Client {
     startDate: string;
     status: 'active' | 'churn' | 'negotiation';
     ltv?: string; // Formatted currency string
+    contractValue?: string; // Monthly value
+    contractDuration?: string; // Number of months
 }
 
 export type TaskStatus = 'todo' | 'in-progress' | 'waiting' | 'done';

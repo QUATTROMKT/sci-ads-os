@@ -60,6 +60,8 @@ export function Tasks() {
         tags: []
     });
 
+    const [showDone, setShowDone] = useState(false);
+
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
         useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
@@ -135,85 +137,90 @@ export function Tasks() {
                     <p className="text-muted-foreground">Gerencie o fluxo de trabalho da agência.</p>
                 </div>
 
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button>
-                            <Plus className="mr-2 h-4 w-4" /> Nova Tarefa
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
-                        <DialogHeader>
-                            <DialogTitle>Nova Tarefa</DialogTitle>
-                            <DialogDescription>Adicione uma nova tarefa ao quadro.</DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="title" className="text-right">Título</Label>
-                                <Input
-                                    id="title"
-                                    className="col-span-3"
-                                    value={newTask.title || ''}
-                                    onChange={e => setNewTask({ ...newTask, title: e.target.value })}
-                                />
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="client" className="text-right">Cliente</Label>
-                                <select
-                                    id="client"
-                                    className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                    value={newTask.clientId || ''}
-                                    onChange={e => setNewTask({ ...newTask, clientId: e.target.value })}
-                                >
-                                    <option value="">Selecione um cliente...</option>
-                                    {clients.map(client => (
-                                        <option key={client.id} value={client.id}>{client.companyName}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="due" className="text-right">Prazo</Label>
-                                <Input
-                                    id="due"
-                                    type="date"
-                                    className="col-span-3"
-                                    value={newTask.dueDate || ''}
-                                    onChange={e => setNewTask({ ...newTask, dueDate: e.target.value })}
-                                />
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="prio" className="text-right">Prioridade</Label>
-                                <select
-                                    id="prio"
-                                    className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                    value={newTask.priority}
-                                    onChange={e => setNewTask({ ...newTask, priority: e.target.value as Task['priority'] })}
-                                >
-                                    <option value="low">Baixa</option>
-                                    <option value="medium">Média</option>
-                                    <option value="high">Alta</option>
-                                </select>
-                            </div>
-                            <div className="grid grid-cols-4 items-start gap-4">
-                                <Label className="text-right mt-2">Tags</Label>
-                                <div className="col-span-3 flex flex-wrap gap-2">
-                                    {AVAILABLE_TAGS.map(tag => (
-                                        <Badge
-                                            key={tag}
-                                            variant={newTask.tags?.includes(tag) ? "default" : "outline"}
-                                            className="cursor-pointer select-none"
-                                            onClick={() => toggleTag(tag)}
-                                        >
-                                            {tag}
-                                        </Badge>
-                                    ))}
+                <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setShowDone(!showDone)}>
+                        {showDone ? 'Ocultar Concluídos' : 'Ver Concluídos'}
+                    </Button>
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button>
+                                <Plus className="mr-2 h-4 w-4" /> Nova Tarefa
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                                <DialogTitle>Nova Tarefa</DialogTitle>
+                                <DialogDescription>Adicione uma nova tarefa ao quadro.</DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="title" className="text-right">Título</Label>
+                                    <Input
+                                        id="title"
+                                        className="col-span-3"
+                                        value={newTask.title || ''}
+                                        onChange={e => setNewTask({ ...newTask, title: e.target.value })}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="client" className="text-right">Cliente</Label>
+                                    <select
+                                        id="client"
+                                        className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                        value={newTask.clientId || ''}
+                                        onChange={e => setNewTask({ ...newTask, clientId: e.target.value })}
+                                    >
+                                        <option value="">Selecione um cliente...</option>
+                                        {clients.map(client => (
+                                            <option key={client.id} value={client.id}>{client.companyName}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="due" className="text-right">Prazo</Label>
+                                    <Input
+                                        id="due"
+                                        type="date"
+                                        className="col-span-3"
+                                        value={newTask.dueDate || ''}
+                                        onChange={e => setNewTask({ ...newTask, dueDate: e.target.value })}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="prio" className="text-right">Prioridade</Label>
+                                    <select
+                                        id="prio"
+                                        className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                        value={newTask.priority}
+                                        onChange={e => setNewTask({ ...newTask, priority: e.target.value as Task['priority'] })}
+                                    >
+                                        <option value="low">Baixa</option>
+                                        <option value="medium">Média</option>
+                                        <option value="high">Alta</option>
+                                    </select>
+                                </div>
+                                <div className="grid grid-cols-4 items-start gap-4">
+                                    <Label className="text-right mt-2">Tags</Label>
+                                    <div className="col-span-3 flex flex-wrap gap-2">
+                                        {AVAILABLE_TAGS.map(tag => (
+                                            <Badge
+                                                key={tag}
+                                                variant={newTask.tags?.includes(tag) ? "default" : "outline"}
+                                                className="cursor-pointer select-none"
+                                                onClick={() => toggleTag(tag)}
+                                            >
+                                                {tag}
+                                            </Badge>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <DialogFooter>
-                            <Button type="submit" onClick={handleAddTask}>Criar Tarefa</Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
+                            <DialogFooter>
+                                <Button type="submit" onClick={handleAddTask}>Criar Tarefa</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
 
             <div className="flex-1 overflow-x-auto pb-4">
@@ -223,15 +230,20 @@ export function Tasks() {
                     onDragEnd={handleDragEnd}
                 >
                     <div className="flex h-full min-w-max gap-4 px-2">
-                        {COLUMNS.map((col) => (
-                            <KanbanColumn
-                                key={col.id}
-                                id={col.id}
-                                title={col.title}
-                                tasks={tasks.filter(t => t.status === col.id)}
-                                color={col.color}
-                            />
-                        ))}
+                        <div className="flex h-full min-w-max gap-4 px-2">
+                            {COLUMNS.map((col) => {
+                                if (col.id === 'done' && !showDone) return null; // Skip Done column if hidden
+                                return (
+                                    <KanbanColumn
+                                        key={col.id}
+                                        id={col.id}
+                                        title={col.title}
+                                        tasks={tasks.filter(t => t.status === col.id)}
+                                        color={col.color}
+                                    />
+                                );
+                            })}
+                        </div>
                     </div>
 
                     <DragOverlay>
@@ -239,6 +251,6 @@ export function Tasks() {
                     </DragOverlay>
                 </DndContext>
             </div>
-        </div>
+        </div >
     );
 }

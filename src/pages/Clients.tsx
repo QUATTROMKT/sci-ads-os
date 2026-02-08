@@ -19,11 +19,11 @@ import {
     DialogFooter
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import type { Client } from '@/types';
+import type { Client, Invoice } from '@/types';
 import { useData } from '@/context/DataContext';
 
 export function Clients() {
-    const { clients, addClient, removeClient } = useData();
+    const { clients, addClient, removeClient, addInvoice } = useData();
     const [searchTerm, setSearchTerm] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -44,6 +44,11 @@ export function Clients() {
         }
 
         try {
+            const monthlyValue = parseFloat(newClient.contractValue?.replace(/[^\d,]/g, '').replace(',', '.') || '0');
+            const duration = parseInt(newClient.contractDuration || '0');
+            const ltvValue = monthlyValue * duration;
+            const formattedLTV = ltvValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
             const client: Client = {
                 id: crypto.randomUUID(),
                 companyName: newClient.companyName,
@@ -51,11 +56,28 @@ export function Clients() {
                 niche: newClient.niche || 'Geral',
                 status: newClient.status as Client['status'] || 'negotiation',
                 startDate: newClient.startDate || new Date().toISOString(),
-                ltv: newClient.ltv || 'R$ 0,00',
+                ltv: formattedLTV,
+                contractValue: newClient.contractValue,
+                contractDuration: newClient.contractDuration,
                 driveLink: newClient.driveLink || ''
             };
 
             await addClient(client);
+
+            // Auto-generate invoice if Active
+            if (client.status === 'active' && monthlyValue > 0) {
+                const invoice: Invoice = {
+                    id: crypto.randomUUID(),
+                    clientId: client.id,
+                    clientName: client.companyName,
+                    amount: monthlyValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+                    dueDate: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0], // +30 days
+                    status: 'pending'
+                };
+                await addInvoice(invoice);
+                alert("Cliente salvo! Uma fatura foi gerada automaticamente para daqui a 30 dias.");
+            }
+
             setNewClient({ status: 'negotiation' }); // Reset form
             setIsDialogOpen(false);
         } catch (error: any) {
@@ -146,13 +168,38 @@ export function Clients() {
                                 </select>
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="ltv" className="text-right">LTV Estimado</Label>
+                                <Label htmlFor="contractValue" className="text-right">Valor Mensal</Label>
+                                <Input
+                                    id="contractValue"
+                                    className="col-span-3"
+                                    placeholder="R$ 1.000,00"
+                                    value={newClient.contractValue || ''}
+                                    onChange={e => setNewClient({ ...newClient, contractValue: e.target.value })}
+                                />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="duration" className="text-right">Duração (Meses)</Label>
+                                <Input
+                                    id="duration"
+                                    className="col-span-3"
+                                    type="number"
+                                    placeholder="6"
+                                    value={newClient.contractDuration || ''}
+                                    onChange={e => setNewClient({ ...newClient, contractDuration: e.target.value })}
+                                />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="ltv" className="text-right">LTV (Automático)</Label>
                                 <Input
                                     id="ltv"
-                                    className="col-span-3"
-                                    placeholder="R$ 0,00"
-                                    value={newClient.ltv || ''}
-                                    onChange={e => setNewClient({ ...newClient, ltv: e.target.value })}
+                                    className="col-span-3 bg-muted"
+                                    placeholder="Será calculado..."
+                                    readOnly
+                                    value={(() => {
+                                        const val = parseFloat(newClient.contractValue?.replace(/[^\d,]/g, '').replace(',', '.') || '0');
+                                        const dur = parseInt(newClient.contractDuration || '0');
+                                        return (val * dur).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                                    })()}
                                 />
                             </div>
                         </div>
