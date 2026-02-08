@@ -44,6 +44,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             const unsubClients = onSnapshot(qClients, (snapshot) => {
                 const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Client));
                 setClients(data);
+            }, (error) => {
+                console.error("Erro ao carregar clientes:", error);
+                // toast.error("Erro de permissão: Você precisa estar logado.");
             });
 
             // Tasks
@@ -51,13 +54,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             const unsubTasks = onSnapshot(qTasks, (snapshot) => {
                 const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Task));
                 setTasks(data);
-            });
+            }, (error) => console.error("Erro ao carregar tarefas:", error));
 
             // Invoices
             const qInvoices = query(collection(db, "invoices"));
             const unsubInvoices = onSnapshot(qInvoices, (snapshot) => {
                 const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Invoice));
                 setInvoices(data);
+                setLoading(false);
+            }, (error) => {
+                console.error("Erro ao carregar faturas:", error);
                 setLoading(false);
             });
 

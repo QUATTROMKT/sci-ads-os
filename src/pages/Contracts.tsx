@@ -39,8 +39,9 @@ export function Contracts() {
         };
 
         // Title
-        addText("CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE CONSULTORIA", 14, true, "center");
-        addText("E GESTÃO DE MARKETING DIGITAL", 14, true, "center");
+        addText("CONTRATO DE PRESTAÇÃO DE SERVIÇOS", 14, true, "center");
+        addText("DE CONSULTORIA E GESTÃO", 14, true, "center");
+        addText("DE MARKETING DIGITAL", 14, true, "center");
         yPos += 10;
 
         // Parties
