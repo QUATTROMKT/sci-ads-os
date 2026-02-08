@@ -37,23 +37,31 @@ export function Clients() {
         client.decisionMaker.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const handleAddClient = () => {
-        if (!newClient.companyName || !newClient.decisionMaker) return;
+    const handleAddClient = async () => {
+        if (!newClient.companyName || !newClient.decisionMaker) {
+            alert("Por favor, preencha o Nome da Empresa e o Decisor.");
+            return;
+        }
 
-        const client: Client = {
-            id: crypto.randomUUID(),
-            companyName: newClient.companyName,
-            decisionMaker: newClient.decisionMaker,
-            niche: newClient.niche || 'Geral',
-            status: newClient.status as Client['status'] || 'negotiation',
-            startDate: newClient.startDate || new Date().toISOString(),
-            ltv: newClient.ltv || 'R$ 0,00',
-            driveLink: newClient.driveLink
-        };
+        try {
+            const client: Client = {
+                id: crypto.randomUUID(),
+                companyName: newClient.companyName,
+                decisionMaker: newClient.decisionMaker,
+                niche: newClient.niche || 'Geral',
+                status: newClient.status as Client['status'] || 'negotiation',
+                startDate: newClient.startDate || new Date().toISOString(),
+                ltv: newClient.ltv || 'R$ 0,00',
+                driveLink: newClient.driveLink
+            };
 
-        addClient(client);
-        setNewClient({ status: 'negotiation' }); // Reset form
-        setIsDialogOpen(false);
+            await addClient(client);
+            setNewClient({ status: 'negotiation' }); // Reset form
+            setIsDialogOpen(false);
+        } catch (error) {
+            console.error("Erro ao adicionar cliente:", error);
+            alert("Erro ao salvar cliente. Tente novamente.");
+        }
     };
 
     const handleDeleteClient = (id: string) => {

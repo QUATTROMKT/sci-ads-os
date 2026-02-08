@@ -21,6 +21,7 @@ export interface Task {
     dueDate: string;
     priority: TaskPriority;
     status: TaskStatus;
+    tags?: string[];
 }
 
 export interface Invoice {

@@ -30,12 +30,22 @@ import {
     DialogDescription,
     DialogFooter
 } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge'; // Import Badge component
 
 const COLUMNS: { id: TaskStatus; title: string; color: string }[] = [
     { id: 'todo', title: 'A Fazer', color: 'bg-slate-500' },
     { id: 'in-progress', title: 'Em Execução', color: 'bg-blue-500' },
     { id: 'waiting', title: 'Aguardando Cliente', color: 'bg-amber-500' },
     { id: 'done', title: 'Concluído', color: 'bg-green-500' },
+];
+
+const AVAILABLE_TAGS = [
+    'Tráfego',
+    'AudioVisual',
+    'Criativos',
+    'Copy',
+    'Jurídico',
+    'SciAds'
 ];
 
 export function Tasks() {
@@ -46,7 +56,8 @@ export function Tasks() {
     // New Task Form
     const [newTask, setNewTask] = useState<Partial<Task>>({
         priority: 'medium',
-        status: 'todo'
+        status: 'todo',
+        tags: []
     });
 
     const sensors = useSensors(
@@ -55,8 +66,11 @@ export function Tasks() {
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
 
-    const handleAddTask = () => {
-        if (!newTask.title || !newTask.clientId || !newTask.dueDate) return;
+    const handleAddTask = async () => {
+        if (!newTask.title || !newTask.clientId || !newTask.dueDate) {
+            alert("Por favor, preencha Título, Cliente e Prazo.");
+            return;
+        }
 
         const client = clients.find(c => c.id === newTask.clientId);
         const clientName = client ? client.companyName : 'Cliente Desconhecido';
@@ -69,12 +83,27 @@ export function Tasks() {
             description: newTask.description || '',
             dueDate: newTask.dueDate,
             priority: newTask.priority as Task['priority'] || 'medium',
-            status: newTask.status as TaskStatus || 'todo'
+            status: newTask.status as TaskStatus || 'todo',
+            tags: newTask.tags || []
         };
 
-        addTask(task);
-        setNewTask({ priority: 'medium', status: 'todo' });
-        setIsDialogOpen(false);
+        try {
+            await addTask(task);
+            setNewTask({ priority: 'medium', status: 'todo', tags: [] });
+            setIsDialogOpen(false);
+        } catch (error) {
+            console.error("Erro ao criar tarefa:", error);
+            alert("Erro ao criar tarefa. Tente novamente.");
+        }
+    };
+
+    const toggleTag = (tag: string) => {
+        const currentTags = newTask.tags || [];
+        if (currentTags.includes(tag)) {
+            setNewTask({ ...newTask, tags: currentTags.filter(t => t !== tag) });
+        } else {
+            setNewTask({ ...newTask, tags: [...currentTags, tag] });
+        }
     };
 
     const handleDragStart = (event: DragStartEvent) => {
@@ -112,7 +141,7 @@ export function Tasks() {
                             <Plus className="mr-2 h-4 w-4" /> Nova Tarefa
                         </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-w-2xl">
                         <DialogHeader>
                             <DialogTitle>Nova Tarefa</DialogTitle>
                             <DialogDescription>Adicione uma nova tarefa ao quadro.</DialogDescription>
@@ -163,6 +192,21 @@ export function Tasks() {
                                     <option value="medium">Média</option>
                                     <option value="high">Alta</option>
                                 </select>
+                            </div>
+                            <div className="grid grid-cols-4 items-start gap-4">
+                                <Label className="text-right mt-2">Tags</Label>
+                                <div className="col-span-3 flex flex-wrap gap-2">
+                                    {AVAILABLE_TAGS.map(tag => (
+                                        <Badge
+                                            key={tag}
+                                            variant={newTask.tags?.includes(tag) ? "default" : "outline"}
+                                            className="cursor-pointer select-none"
+                                            onClick={() => toggleTag(tag)}
+                                        >
+                                            {tag}
+                                        </Badge>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                         <DialogFooter>

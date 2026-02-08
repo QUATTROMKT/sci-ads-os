@@ -49,6 +49,16 @@ export function KanbanCard({ task }: KanbanCardProps) {
                     <span className="truncate max-w-[120px]">{task.clientName}</span>
                 </div>
 
+                {task.tags && task.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                        {task.tags.map(tag => (
+                            <div key={tag} className="text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded-sm">
+                                {tag}
+                            </div>
+                        ))}
+                    </div>
+                )}
+
                 <div className="flex items-center justify-between">
                     <div className={`flex items-center text-xs ${new Date(task.dueDate) < new Date() ? 'text-red-500 font-medium' : 'text-muted-foreground'
                         }`}>
