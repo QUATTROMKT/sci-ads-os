@@ -58,9 +58,9 @@ export function Clients() {
             await addClient(client);
             setNewClient({ status: 'negotiation' }); // Reset form
             setIsDialogOpen(false);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Erro ao adicionar cliente:", error);
-            alert("Erro ao salvar cliente. Tente novamente.");
+            alert(`Erro ao salvar cliente: ${error.message}`);
         }
     };
 

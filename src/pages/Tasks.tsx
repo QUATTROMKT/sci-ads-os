@@ -91,9 +91,9 @@ export function Tasks() {
             await addTask(task);
             setNewTask({ priority: 'medium', status: 'todo', tags: [] });
             setIsDialogOpen(false);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Erro ao criar tarefa:", error);
-            alert("Erro ao criar tarefa. Tente novamente.");
+            alert(`Erro ao criar tarefa: ${error.message}`);
         }
     };
 
