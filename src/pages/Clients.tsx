@@ -4,7 +4,8 @@ import {
     Search,
     Filter,
     ExternalLink,
-    Trash2
+    Trash2,
+    Pencil
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,11 +24,12 @@ import type { Client, Invoice } from '@/types';
 import { useData } from '@/context/DataContext';
 
 export function Clients() {
-    const { clients, addClient, removeClient, addInvoice } = useData();
+    const { clients, addClient, updateClient, removeClient, addInvoice } = useData();
     const [searchTerm, setSearchTerm] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
 
-    // New Client Form State
+    // New/Edit Client Form State
     const [newClient, setNewClient] = useState<Partial<Client>>({
         status: 'negotiation'
     });
@@ -37,7 +39,7 @@ export function Clients() {
         client.decisionMaker.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const handleAddClient = async () => {
+    const handleSaveClient = async () => {
         if (!newClient.companyName || !newClient.decisionMaker) {
             alert("Por favor, preencha o Nome da Empresa e o Decisor.");
             return;
@@ -49,8 +51,8 @@ export function Clients() {
             const ltvValue = monthlyValue * duration;
             const formattedLTV = ltvValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-            const client: Client = {
-                id: crypto.randomUUID(),
+            const clientData: Client = {
+                id: editingId || crypto.randomUUID(),
                 companyName: newClient.companyName,
                 decisionMaker: newClient.decisionMaker,
                 niche: newClient.niche || 'Geral',
@@ -62,28 +64,52 @@ export function Clients() {
                 driveLink: newClient.driveLink || ''
             };
 
-            await addClient(client);
+            let shouldGenerateInvoice = false;
+
+            if (editingId) {
+                // Update Logic
+                const originalClient = clients.find(c => c.id === editingId);
+                await updateClient(clientData);
+
+                // Trigger invoice if status changed to active
+                if (clientData.status === 'active' && originalClient?.status !== 'active') {
+                    shouldGenerateInvoice = true;
+                }
+            } else {
+                // Create Logic
+                await addClient(clientData);
+                if (clientData.status === 'active') {
+                    shouldGenerateInvoice = true;
+                }
+            }
 
             // Auto-generate invoice if Active
-            if (client.status === 'active' && monthlyValue > 0) {
+            if (shouldGenerateInvoice && monthlyValue > 0) {
                 const invoice: Invoice = {
                     id: crypto.randomUUID(),
-                    clientId: client.id,
-                    clientName: client.companyName,
+                    clientId: clientData.id,
+                    clientName: clientData.companyName,
                     amount: monthlyValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
                     dueDate: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0], // +30 days
                     status: 'pending'
                 };
                 await addInvoice(invoice);
-                alert("Cliente salvo! Uma fatura foi gerada automaticamente para daqui a 30 dias.");
+                alert("Cliente salvo! Status Ativo detectado: Fatura gerada automaticamente.");
             }
 
             setNewClient({ status: 'negotiation' }); // Reset form
+            setEditingId(null);
             setIsDialogOpen(false);
         } catch (error: any) {
-            console.error("Erro ao adicionar cliente:", error);
+            console.error("Erro ao salvar cliente:", error);
             alert(`Erro ao salvar cliente: ${error.message}`);
         }
+    };
+
+    const handleEditClient = (client: Client) => {
+        setNewClient(client);
+        setEditingId(client.id);
+        setIsDialogOpen(true);
     };
 
     const handleDeleteClient = (id: string) => {
@@ -121,9 +147,9 @@ export function Clients() {
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Novo Cliente</DialogTitle>
+                            <DialogTitle>{editingId ? 'Editar Cliente' : 'Novo Cliente'}</DialogTitle>
                             <DialogDescription>
-                                Preencha as informações abaixo para cadastrar um novo cliente.
+                                {editingId ? 'Atualize as informações do cliente.' : 'Preencha as informações abaixo para cadastrar um novo cliente.'}
                             </DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
@@ -204,7 +230,7 @@ export function Clients() {
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button type="submit" onClick={handleAddClient}>Salvar Cliente</Button>
+                            <Button type="submit" onClick={handleSaveClient}>Salvar Cliente</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
@@ -260,6 +286,9 @@ export function Clients() {
                                                     <ExternalLink className="h-4 w-4" />
                                                 </Button>
                                             )}
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-amber-500 hover:text-amber-700" onClick={() => handleEditClient(client)}>
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
                                             <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-700" onClick={() => handleDeleteClient(client.id)}>
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
