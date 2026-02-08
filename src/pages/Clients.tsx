@@ -141,7 +141,10 @@ export function Clients() {
 
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button>
+                        <Button onClick={() => {
+                            setNewClient({ status: 'negotiation' });
+                            setEditingId(null);
+                        }}>
                             <Plus className="mr-2 h-4 w-4" /> Adicionar Cliente
                         </Button>
                     </DialogTrigger>
