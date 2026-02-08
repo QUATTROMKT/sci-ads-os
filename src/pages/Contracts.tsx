@@ -28,9 +28,21 @@ export function Contracts() {
             doc.setFontSize(fontSize);
             doc.setFont("helvetica", isBold ? "bold" : "normal");
 
-            const splitText = doc.splitTextToSize(text, 170);
-            doc.text(splitText, margin, yPos, { align: align === "justify" ? "left" : align, maxWidth: 170 });
-            yPos += (splitText.length * 5) + 5;
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let xPos = margin;
+
+            if (align === "center") {
+                xPos = pageWidth / 2;
+            } else if (align === "right") {
+                xPos = pageWidth - margin;
+            }
+
+            const splitText = doc.splitTextToSize(text, 170); // 170 is safe width for A4 with 20mm margins
+            doc.text(splitText, xPos, yPos, { align: align === "justify" ? "left" : align, maxWidth: 170 });
+
+            // Adjust line height
+            const lineHeight = fontSize * 0.5; // Approximate conversion pt to mm
+            yPos += (splitText.length * lineHeight) + 6; // +6 for spacing
 
             if (yPos > 280) {
                 doc.addPage();
@@ -39,10 +51,8 @@ export function Contracts() {
         };
 
         // Title
-        addText("CONTRATO DE PRESTAÇÃO DE SERVIÇOS", 14, true, "center");
-        addText("DE CONSULTORIA E GESTÃO", 14, true, "center");
-        addText("DE MARKETING DIGITAL", 14, true, "center");
-        yPos += 10;
+        addText("CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE CONSULTORIA E GESTÃO DE MARKETING DIGITAL", 14, true, "center");
+        yPos += 5;
 
         // Parties
         addText("DAS PARTES", 12, true);
