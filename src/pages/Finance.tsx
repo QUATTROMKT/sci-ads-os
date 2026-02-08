@@ -5,7 +5,9 @@ import {
     Download,
     CheckCircle2,
     Clock,
-    AlertCircle
+    AlertCircle,
+    Pencil,
+    Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,11 +26,12 @@ import type { Invoice } from '@/types';
 import { useData } from '@/context/DataContext';
 
 export function Finance() {
-    const { invoices, addInvoice, clients } = useData();
+    const { invoices, addInvoice, updateInvoice, removeInvoice, clients } = useData();
     const [searchTerm, setSearchTerm] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
 
-    // New Invoice Form
+    // New/Edit Invoice Form
     const [newInvoice, setNewInvoice] = useState<Partial<Invoice>>({
         status: 'pending'
     });
@@ -37,14 +40,14 @@ export function Finance() {
         inv.clientName.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const handleAddInvoice = () => {
+    const handleSaveInvoice = () => {
         if (!newInvoice.clientId || !newInvoice.amount || !newInvoice.dueDate) return;
 
         const client = clients.find(c => c.id === newInvoice.clientId);
         const clientName = client ? client.companyName : 'Cliente Desconhecido';
 
-        const invoice: Invoice = {
-            id: crypto.randomUUID(),
+        const invoiceData: Invoice = {
+            id: editingId || crypto.randomUUID(),
             clientId: newInvoice.clientId,
             clientName: clientName,
             amount: newInvoice.amount,
@@ -52,9 +55,27 @@ export function Finance() {
             status: newInvoice.status as Invoice['status'] || 'pending'
         };
 
-        addInvoice(invoice);
+        if (editingId) {
+            updateInvoice(invoiceData);
+        } else {
+            addInvoice(invoiceData);
+        }
+
         setNewInvoice({ status: 'pending' });
+        setEditingId(null);
         setIsDialogOpen(false);
+    };
+
+    const handleEditInvoice = (invoice: Invoice) => {
+        setNewInvoice(invoice);
+        setEditingId(invoice.id);
+        setIsDialogOpen(true);
+    };
+
+    const handleDeleteInvoice = (id: string) => {
+        if (confirm('Tem certeza que deseja excluir este pagamento?')) {
+            removeInvoice(id);
+        }
     };
 
     const getStatusBadge = (status: Invoice['status']) => {
@@ -92,14 +113,19 @@ export function Finance() {
 
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button>
+                        <Button onClick={() => {
+                            setNewInvoice({ status: 'pending' });
+                            setEditingId(null);
+                        }}>
                             <Plus className="mr-2 h-4 w-4" /> Novo Pagamento
                         </Button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Novo Pagamento</DialogTitle>
-                            <DialogDescription>Lance um novo pagamento ou fatura.</DialogDescription>
+                            <DialogTitle>{editingId ? 'Editar Pagamento' : 'Novo Pagamento'}</DialogTitle>
+                            <DialogDescription>
+                                {editingId ? 'Atualize as informações do pagamento.' : 'Lance um novo pagamento ou fatura.'}
+                            </DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
@@ -151,7 +177,7 @@ export function Finance() {
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button type="submit" onClick={handleAddInvoice}>Salvar Pagamento</Button>
+                            <Button type="submit" onClick={handleSaveInvoice}>Salvar Pagamento</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
@@ -209,9 +235,14 @@ export function Finance() {
                                         {getStatusBadge(bg.status)}
                                     </td>
                                     <td className="px-4 py-3 text-right">
-                                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                                            <Download className="h-4 w-4 text-muted-foreground" />
-                                        </Button>
+                                        <div className="flex items-center justify-end gap-2">
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-amber-500 hover:text-amber-700" onClick={() => handleEditInvoice(bg)}>
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-700" onClick={() => handleDeleteInvoice(bg.id)}>
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
