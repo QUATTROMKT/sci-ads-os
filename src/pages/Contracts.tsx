@@ -50,11 +50,7 @@ export function Contracts() {
             }
         };
 
-        // Helper for currency and dates
-        const formatMoney = (val: string) => {
-            const num = parseFloat(val.replace(/\./g, '').replace(',', '.').replace('R$', '').trim());
-            return isNaN(num) ? '0,00' : num.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-        };
+
 
         const calculateHalf = (val: string) => {
             const num = parseFloat(val.replace(/\./g, '').replace(',', '.').replace('R$', '').trim());
