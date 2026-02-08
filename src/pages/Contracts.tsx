@@ -50,6 +50,27 @@ export function Contracts() {
             }
         };
 
+        // Helper for currency and dates
+        const formatMoney = (val: string) => {
+            const num = parseFloat(val.replace(/\./g, '').replace(',', '.').replace('R$', '').trim());
+            return isNaN(num) ? '0,00' : num.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        };
+
+        const calculateHalf = (val: string) => {
+            const num = parseFloat(val.replace(/\./g, '').replace(',', '.').replace('R$', '').trim());
+            return isNaN(num) ? '0,00' : (num / 2).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        }
+
+        const formatDate = (dateString: string) => {
+            if (!dateString) return 'DD/MM/AAAA';
+            const [year, month, day] = dateString.split('-');
+            return `${day}/${month}/${year}`;
+        };
+
+        const today = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+        // --- PDF CONTENT START ---
+
         // Title
         addText("CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE CONSULTORIA E GESTÃO DE MARKETING DIGITAL", 14, true, "center");
         yPos += 5;
@@ -58,42 +79,117 @@ export function Contracts() {
         addText("DAS PARTES", 12, true);
         addText(`CONTRATANTE: ${formData.clientName.toUpperCase()}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº ${formData.clientCNPJ}, com sede na ${formData.clientAddress}, neste ato representada por seu sócio/procurador, Sr. ${formData.clientRepName}, portador do CPF nº ${formData.clientRepCPF}.`, 11, false, "justify");
 
-        addText(`CONTRATADA: SCI ADS AGENCY LTDA (representada por CARLOS EDUARDO DA CUNHA BRAGA), inscrita no CNPJ sob o nº 61.110.568/0001-50, com sede a Rua Terezinha Schirmer Schramm, 85, Santa Maria - RS.`, 11, false, "justify");
+        addText("CONTRATADA: CARLOS EDUARDO DA CUNHA BRAGA, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº 61.110.568/0001-50, com sede na Rua Terezinha Schirmer Schramm, 85, Bairro Presidente João Goulart, Santa Maria - RS, CEP 97090-597, neste ato representada por CARLOS EDUARDO DA CUNHA BRAGA, portador do CPF nº 037.113.100-60.", 11, false, "justify");
 
         addText("As partes acima identificadas celebram o presente Contrato de Prestação de Serviços, que se regerá pelas cláusulas e condições a seguir.", 11, false, "justify");
         yPos += 5;
 
-        // Clausula 1
+        // Clause 1
         addText("CLÁUSULA 1ª – DO OBJETO", 12, true);
-        addText("1.1. O objeto deste contrato é a prestação de serviços de consultoria, estratégia, gestão de tráfego pago e produção de conteúdo digital, conforme descrito no \"Projeto de Aceleração Digital 90 Dias\" (Sprint 90 Dias).", 11, false, "justify");
-        addText("1.2. O objetivo principal dos serviços é estruturar a base digital da CONTRATANTE, construir autoridade de marca e implementar motores de aquisição de clientes.", 11, false, "justify");
+        addText("1.1. O objeto deste contrato é a prestação de serviços de consultoria, estratégia, gestão de tráfego pago e produção de conteúdo digital, conforme descrito no \"Projeto de Aceleração Digital 90 Dias\" (Sprint 90 Dias), apresentado e aprovado pela CONTRATANTE.", 11, false, "justify");
+        addText("1.2. O objetivo principal dos serviços é estruturar a base digital da CONTRATANTE, construir autoridade de marca e implementar motores de aquisição de clientes (Geração de Caixa), conforme detalhado na proposta estratégica.", 11, false, "justify");
 
-        // Clausula 2
+        // Clause 2
         addText("CLÁUSULA 2ª – DO PRAZO", 12, true);
-        addText("2.1. O presente contrato terá a duração determinada de 90 (noventa) dias.", 11, false, "justify");
-        const start = new Date(formData.startDate).toLocaleDateString('pt-BR');
-        const end = new Date(formData.endDate).toLocaleDateString('pt-BR');
-        addText(`2.2. O início da prestação dos serviços se dará em ${start}, encerrando-se em ${end}.`, 11, false, "justify");
+        addText("2.1. O presente contrato terá a duração determinada de 90 (noventa) dias, referentes ao \"Sprint 90 Dias\".", 11, false, "justify");
+        addText(`2.2. O início da prestação dos serviços se dará em ${formatDate(formData.startDate)}, encerrando-se em ${formatDate(formData.endDate)}.`, 11, false, "justify");
 
-        // Clausula 3 (Simplified for brevity in PDF generation logic, but capturing key points)
+        // Clause 3
         addText("CLÁUSULA 3ª – DOS SERVIÇOS E ENTREGÁVEIS", 12, true);
-        addText("3.1. A CONTRATADA executará as 4 fases do projeto: 1) Fundação e Estruturação (Setup); 2) Construção de Autoridade; 3) Geração de Caixa e Performance; 4) Imersão e Otimização.", 11, false, "justify");
+        addText("3.1. A CONTRATADA se compromete a executar os serviços descritos nas quatro fases do projeto, conforme detalhado na tabela de entregáveis. Os serviços incluem, mas não se limitam a:", 11, false, "justify");
 
-        // Clausula 6
+        addText("3.1.1. FASE 1: FUNDAÇÃO E ESTRUTURAÇÃO (SETUP)", 11, true);
+        addText("Setup Técnico Completo: Configuração e otimização das contas de anúncio (Meta Ads, Google Ads), redes sociais (Instagram, Facebook, LinkedIn) e Google Meu Negócio.", 11, false, "justify");
+        addText("Treinamento Operacional: Uma (1) sessão de capacitação da equipe interna da CONTRATANTE para execução da estratégia de conteúdo diário (Stories), incluindo a entrega de um cronograma de conteúdo.", 11, false, "justify");
+
+        addText("3.1.2. FASE 2: CONSTRUÇÃO DE AUTORIDADE", 11, true);
+        addText("Implementação de campanhas de reconhecimento e funil de vídeos estratégicos, abordando: Atração (Ex: \"Na Kobber Têm\"), Conexão (História/Tradição) e Prova Social (Estrutura/Equipe).", 11, false, "justify");
+
+        addText("3.1.3. FASE 3: GERAÇÃO DE CAIXA E PERFORMANCE", 11, true);
+        addText("Criação e gestão de campanhas de Alta Margem (foco em Motor/Caixa) para público qualificado no RS e SC.", 11, false, "justify");
+        addText("Criação e gestão de Campanhas Sazonais (Fluxo de Caixa), visando a \"queima de estoque\" de peças paradas (Ex: \"Mês da Roda\").", 11, false, "justify");
+
+        addText("3.1.4. FASE 4: IMERSÃO E OTIMIZAÇÃO (GESTÃO CONTÍNUA)", 11, true);
+        addText("Gestão \"Lado a Lado\" para otimização de processos.", 11, false, "justify");
+        addText("Testes contínuos de criativos, públicos e otimização de performance.", 11, false, "justify");
+        addText("Entrega de doze (12) Relatórios Semanais de Performance.", 11, false, "justify");
+        addText("Acompanhamento contínuo das metas de faturamento.", 11, false, "justify");
+
+        addText("3.1.5. PRODUÇÃO DE CONTEÚDO", 11, true);
+        addText("Roteiro de Vídeo Estratégico: 12 unidades (1 por semana).", 11, false, "justify");
+        addText("Captação (Filmagem) Profissional: 12 sessões (1 por semana).", 11, false, "justify");
+        addText("Edição de Vídeo (Feed/Anúncio): 12 unidades (1 por semana).", 11, false, "justify");
+
+        // Clause 4
+        addText("CLÁUSULA 4ª – DAS OBRIGAÇÕES DA CONTRATADA", 12, true);
+        addText("4.1. Prestar os serviços descritos na Cláusula 3ª com zelo profissional, ética e observância às melhores práticas de mercado.", 11, false, "justify");
+        addText("4.2. Fornecer relatórios de performance semanais à CONTRATANTE.", 11, false, "justify");
+        addText("4.3. Manter sigilo absoluto sobre todas as informações da CONTRATANTE, conforme Cláusula 7ª.", 11, false, "justify");
+        addText("4.4. A CONTRATADA prestará serviços como uma consultoria independente, não estabelecendo este contrato qualquer vínculo empregatício com a CONTRATANTE.", 11, false, "justify");
+        addText("4.5. A CONTRATADA se compromete a empregar todos os esforços e técnicas para a otimização das campanhas, tratando-se de uma obrigação de meio, e não de resultado financeiro (faturamento) específico.", 11, false, "justify");
+
+        // Clause 5
+        addText("CLÁUSULA 5ª – DAS OBRIGAÇÕES DA CONTRATANTE", 12, true);
+        addText("5.1. Efetuar o pagamento dos honorários conforme estabelecido na Cláusula 6ª.", 11, false, "justify");
+        addText("5.2. Fornecer à CONTRATADA, em tempo hábil, todos os acessos necessários (logins, senhas, contas de anúncio, redes sociais) para a execução dos serviços.", 11, false, "justify");
+        addText(`5.3. Indicar o Sr. ${formData.clientRepName} como ponto focal para comunicação, aprovações e fornecimento de informações.`, 11, false, "justify");
+        addText("5.4. Fornecer o investimento (verba de anúncios) a ser pago diretamente às plataformas (Meta), valor este que não está incluso nos honorários deste contrato.", 11, false, "justify");
+        addText("5.5. Participar do Treinamento Operacional e designar a equipe interna responsável pela execução da estratégia de conteúdo diário (Stories, Atendimento, etc.).", 11, false, "justify");
+        addText("5.6. Fornecer materiais institucionais (logos, informações históricas, fotos de estoque) necessários para a criação dos conteúdos e vídeos.", 11, false, "justify");
+
+        // Clause 6
         addText("CLÁUSULA 6ª – DO VALOR E FORMA DE PAGAMENTO", 12, true);
-        addText(`6.1. Pelos serviços, a CONTRATANTE pagará o valor total de R$ ${formData.monthlyFee}.`, 11, false, "justify");
-        addText("6.3. Pagamento via PIX; chave: 61.110.568/0001-50.", 11, false, "justify");
+        addText(`6.1. Pelos serviços de consultoria, gestão e produção descritos neste contrato, a CONTRATANTE pagará à CONTRATADA o valor total de R$ ${formData.monthlyFee}, referente ao "Projeto Sprint 90 Dias".`, 11, false, "justify");
+        addText("6.2. O pagamento será efetuado da seguinte forma (conforme Condição Especial da proposta):", 11, false, "justify");
+
+        addText(`Opção A (À Vista): Pagamento integral de R$ ${formData.monthlyFee} na data da assinatura deste contrato.`, 11, false, "justify");
+
+        const halfValue = calculateHalf(formData.monthlyFee);
+        addText(`Opção B (2x): Pagamento de uma entrada de R$ ${halfValue} na data da assinatura deste contrato, e uma segunda parcela de R$ ${halfValue} em 30 (trinta) dias corridos.`, 11, false, "justify");
+
+        addText("6.3. O(s) pagamento(s) deverá(ão) ser efetuado(s) através de PIX; chave: 61.110.568/0001-50", 11, false, "justify");
+        addText("6.4. O não pagamento nas datas estipuladas sujeitará a CONTRATANTE a multa de 2% (dois por cento) e juros de 1% (um por cento) ao mês sobre o valor devido, podendo a CONTRATADA suspender os serviços após 5 (cinco) dias úteis de atraso, até a regularização.", 11, false, "justify");
+
+        // Clause 7
+        addText("CLÁUSULA 7ª – DA CONFIDENCIALIDADE E SIGILO (NDA)", 12, true);
+        addText("7.1. A CONTRATADA obriga-se, em caráter irrevogável e irretratável, a manter o mais absoluto sigilo sobre quaisquer dados, informações estratégicas, comerciais, técnicas ou financeiras da CONTRATANTE a que venha a ter acesso em decorrência da execução deste contrato.", 11, false, "justify");
+        addText("7.2. Este sigilo inclui, mas não se limita a: números de faturamento, volume de vendas, margens de lucro, custos operacionais, processos de atendimento (como o fluxo do WhatsApp), dados de estoque, lista de clientes, fornecedores e qualquer outra informação que não seja de domínio público.", 11, false, "justify");
+        addText("7.3. A CONTRATADA não poderá divulgar, copiar, reproduzir ou transmitir tais informações a terceiros sem a prévia e expressa autorização por escrito da CONTRATANTE.", 11, false, "justify");
+        addText("7.4. A CONTRATADA compromete-se a utilizar as informações confidenciais exclusivamente para os fins deste contrato.", 11, false, "justify");
+        addText("7.5. A obrigação de sigilo prevista nesta cláusula sobreviverá ao término ou rescisão deste contrato por um período vitalício.", 11, false, "justify");
+
+        // Clause 8
+        addText("CLÁUSULA 8ª – DA RESCISÃO", 12, true);
+        addText("8.1. O presente contrato poderá ser rescindido por qualquer das partes, mediante comunicação por escrito com antecedência mínima de 15 dias.", 11, false, "justify");
+        addText("8.2. Caso a rescisão ocorra por iniciativa da CONTRATANTE sem justa causa (inadimplemento da CONTRATADA), os valores já pagos não serão reembolsados, e a CONTRATANTE deverá pagar pelos serviços proporcionalmente prestados até a data da rescisão.", 11, false, "justify");
+        addText("8.3. Caso a rescisão ocorra por inadimplemento de qualquer das partes, a parte infratora ficará sujeita ao pagamento de multa rescisória no valor de 20% do valor do contrato, sem prejuízo de eventuais perdas e danos.", 11, false, "justify");
+
+        // Clause 9
+        addText("CLÁUSULA 9ª – DO FORO", 12, true);
+        addText("9.1. As partes elegem o Foro da Comarca de Santa Maria, Estado do Rio Grande do Sul, para dirimir quaisquer controvérsias oriundas deste contrato, renunciando a qualquer outro, por mais privilegiado que seja.", 11, false, "justify");
+
+        yPos += 5;
+        addText("E, por estarem assim justas e contratadas, assinam o presente instrumento em 2 (duas) vias de igual teor e forma, na presença de 2 (duas) testemunhas.", 11, false, "justify");
+
+        yPos += 5;
+        addText(`Santa Maria, ${today}.`, 11, false, "right");
 
         // Signatures
         yPos += 20;
-        if (yPos > 250) { doc.addPage(); yPos = 40; }
+        if (yPos > 240) { doc.addPage(); yPos = 40; }
 
         addText("__________________________________", 11, false, "left");
         addText(`CONTRATANTE: ${formData.clientName}`, 11, true, "left");
-        yPos += 10;
+        addText(`Por: ${formData.clientRepName}`, 10, false, "left");
+        addText(`CPF: ${formData.clientRepCPF}`, 10, false, "left");
+
+        yPos += 20;
 
         addText("__________________________________", 11, false, "left");
-        addText("CONTRATADA: SCI ADS AGENCY LTDA", 11, true, "left");
+        addText("CONTRATADA: CARLOS EDUARDO DA CUNHA BRAGA", 11, true, "left");
+        addText("Por: CARLOS EDUARDO DA CUNHA BRAGA", 10, false, "left");
+        addText("CPF: 037.113.100-60", 10, false, "left");
+        addText("JOÃO LEONARDO SANGOI KUPKE CPF: 030.519.500-09", 10, false, "left");
 
         // Save
         doc.save(`Contrato_${formData.clientName.replace(/\s+/g, '_')}.pdf`);
@@ -208,7 +304,7 @@ export function Contracts() {
                 <Card className="bg-muted/30 border-dashed">
                     <CardHeader>
                         <CardTitle>Prévia do Modelo</CardTitle>
-                        <CardDescription>O contrato será gerado com base no modelo Kobber.</CardDescription>
+                        <CardDescription>O contrato será gerado com base no novo modelo padrão.</CardDescription>
                     </CardHeader>
                     <CardContent className="text-sm text-muted-foreground space-y-4">
                         <div className="p-4 bg-background rounded border shadow-sm h-[600px] overflow-hidden relative">
@@ -218,16 +314,14 @@ export function Contracts() {
                                 <br />
                                 <p className="font-bold">DAS PARTES</p>
                                 <p><span className="font-bold">CONTRATANTE:</span> {formData.clientName}, CNPJ {formData.clientCNPJ}...</p>
-                                <p><span className="font-bold">CONTRATADA:</span> SCI ADS AGENCY LTDA...</p>
+                                <p><span className="font-bold">CONTRATADA:</span> CARLOS EDUARDO DA CUNHA BRAGA...</p>
                                 <br />
                                 <p className="font-bold">CLÁUSULA 1ª – DO OBJETO</p>
                                 <p>1.1. O objeto deste contrato é a prestação de serviços de consultoria...</p>
                                 <br />
-                                <p className="font-bold">CLÁUSULA 2ª – DO PRAZO</p>
-                                <p>2.1. Início: {formData.startDate} | Término: {formData.endDate}</p>
-                                <br />
-                                <p className="font-bold">CLÁUSULA 3ª – DOS SERVIÇOS</p>
-                                <p>3.1. Fases 1 a 4 (Setup, Autoridade, Geração de Caixa, Otimização)...</p>
+                                <p className="font-bold">CLÁUSULA 3ª – DOS SERVIÇOS E ENTREGÁVEIS</p>
+                                <p>3.1. FASE 1: FUNDAÇÃO E ESTRUTURAÇÃO...</p>
+                                <p>3.1.2. FASE 2: CONSTRUÇÃO DE AUTORIDADE...</p>
                                 <br />
                                 <p className="font-bold">CLÁUSULA 6ª – DO VALOR</p>
                                 <p>Total de R$ {formData.monthlyFee}. Pagamento via PIX.</p>
