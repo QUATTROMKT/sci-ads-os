@@ -55,6 +55,9 @@ export function Sidebar() {
                         <LogOut className="h-4 w-4" />
                         Sair
                     </button>
+                    <div className="px-3 py-2 text-xs text-muted-foreground opacity-50">
+                        v1.2 (Latest)
+                    </div>
                 </nav>
             </div>
         </div>
