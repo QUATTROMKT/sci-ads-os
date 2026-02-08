@@ -52,7 +52,7 @@ export function Clients() {
                 status: newClient.status as Client['status'] || 'negotiation',
                 startDate: newClient.startDate || new Date().toISOString(),
                 ltv: newClient.ltv || 'R$ 0,00',
-                driveLink: newClient.driveLink
+                driveLink: newClient.driveLink || ''
             };
 
             await addClient(client);
